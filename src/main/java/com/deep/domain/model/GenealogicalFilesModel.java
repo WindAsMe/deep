@@ -22,13 +22,8 @@ public class GenealogicalFilesModel {
     private String immuneEartag;  //免疫耳牌
     @NotEmpty
     @NotNull
-<<<<<<< HEAD
     @Size(min = 6, max = 6, message = "trademarkEartag need size:6 ")
     @Pattern(regexp = "G+[0-9]+$|M+[0-9]+$", message = "商标耳牌由字母+数字组成6位")
-=======
-    @Size(min = 7, max = 7, message = "trademarkEartag need size:7 ")
-    @Pattern(regexp = "G+[0-9]+$|M+[0-9]+$", message = "商标耳牌由字母+数字组成7位")
->>>>>>> 2037917991b9fc1ec298b7ebcf1bd3b710e01c4c
     private String tradeMarkEartag;  //商标耳牌
     @NotEmpty
     @NotNull
@@ -51,7 +46,6 @@ public class GenealogicalFilesModel {
 
     @NotEmpty
     @NotNull
-<<<<<<< HEAD
     @Size(min = 6, max = 6, message = "trademarkEartag need size:6 ")
     @Pattern(regexp = "G+[0-9]+$", message = "父商标耳牌由字母+数字组成6位")
     private String eartagOfFather;  //父耳牌
@@ -79,23 +73,6 @@ public class GenealogicalFilesModel {
     @NotNull
     @Size(min = 6, max = 6, message = "trademarkEartag need size:6 ")
     @Pattern(regexp = "M+[0-9]+$", message = "母母商标耳牌由字母+数字组成6位")
-=======
-    private String eartagOfFather;  //父耳牌
-    @NotEmpty
-    @NotNull
-    private String eartagOfMother;  //母耳牌
-    @NotEmpty
-    @NotNull
-    private String eartagOfFathersFather;  //父父耳牌
-    @NotEmpty
-    @NotNull
-    private String eartagOfFathersMother;  //父母耳牌
-    @NotEmpty
-    @NotNull
-    private String eartagOfMothersFather;  //母父耳牌
-    @NotEmpty
-    @NotNull
->>>>>>> 2037917991b9fc1ec298b7ebcf1bd3b710e01c4c
     private String eartagOfMothersMother;  //母母耳牌
     @Min(0)
     private int operatorId;
