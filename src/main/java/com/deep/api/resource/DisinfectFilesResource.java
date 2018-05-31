@@ -447,30 +447,42 @@ public class DisinfectFilesResource {
 
         logger.info("invoke operatorUpdate {}", disinfectFilesModel);
         disinfectFilesModel.setId(id);
-        if (disinfectEartagFile != null) {
-            String filePath = pathPre + disinfectFilesModel.getFactoryNum().toString() + "/disinfectEartag/";
-            String fileName = disinfectEartagFile.getOriginalFilename();
-            try {
-                fileName =  UploadUtil.uploadFile(disinfectEartagFile.getBytes(),filePath,fileName);
-            } catch (Exception e) {
-                return Responses.errorResponse("update file error");
-            }
 
-            String oldPath = filePath + disinfectFilesModel.getDisinfectEartag();
-            disinfectFilesModel.setDisinfectEartag(fileName);
-            int row = this.disinfectFilesService.updateDisinfectFilesModelByOperatorName(disinfectFilesModel);
-            if (row == 1) {
-                File file = new File(oldPath);
-                file.delete();
-            } else {
-                String newPath = filePath + fileName;
-                File file = new File(newPath);
-                file.delete();
-            }
-            return JudgeUtil.JudgeUpdate(row);
+        // If object ispassCheck = 1, No change
+        // Else can change
+        // Reset ispassCheck = 2
+        DisinfectFilesModel judgeTemp = disinfectFilesService.getDisinfectFilesModelById(id);
+        if ("1".equals(judgeTemp.getIspassCheck()) || "1".equals(judgeTemp.getIspassSup())) {
+            return Responses.errorResponse("已审核/监督,不可修改");
         } else {
-            int row = this.disinfectFilesService.updateDisinfectFilesModelByOperatorName(disinfectFilesModel);
-            return JudgeUtil.JudgeUpdate(row);
+            if (disinfectEartagFile != null) {
+                String filePath = pathPre + disinfectFilesModel.getFactoryNum().toString() + "/disinfectEartag/";
+                String fileName = disinfectEartagFile.getOriginalFilename();
+                try {
+                    fileName = UploadUtil.uploadFile(disinfectEartagFile.getBytes(), filePath, fileName);
+                } catch (Exception e) {
+                    return Responses.errorResponse("update file error");
+                }
+
+                String oldPath = filePath + disinfectFilesModel.getDisinfectEartag();
+                disinfectFilesModel.setDisinfectEartag(fileName);
+                // Yet supervised
+                disinfectFilesModel.setIspassCheck("2");
+                disinfectFilesModel.setIspassSup("2");
+                int row = this.disinfectFilesService.updateDisinfectFilesModelByOperatorName(disinfectFilesModel);
+                if (row == 1) {
+                    File file = new File(oldPath);
+                    file.delete();
+                } else {
+                    String newPath = filePath + fileName;
+                    File file = new File(newPath);
+                    file.delete();
+                }
+                return JudgeUtil.JudgeUpdate(row);
+            } else {
+                int row = this.disinfectFilesService.updateDisinfectFilesModelByOperatorName(disinfectFilesModel);
+                return JudgeUtil.JudgeUpdate(row);
+            }
         }
     }
 

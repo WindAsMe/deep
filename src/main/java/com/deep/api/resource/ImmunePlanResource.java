@@ -446,44 +446,50 @@ public class ImmunePlanResource {
                                    @Validated ImmunePlanModel immunePlanModel,
                                    BindingResult bindingResult,
                                    @RequestParam(value = "immuneEartagFile", required = false) MultipartFile immuneEartagFile) {
+        logger.info("invoke operatorUpdate {}", immunePlanModel);
 
-          logger.info("invoke operatorUpdate {}", immunePlanModel);
-          if (bindingResult.hasErrors()) {
-             Response response = Responses.successResponse();
-             Map<String, Object> data = new HashMap<String, Object>();
-             data.put("error",bindingResult.getAllErrors());
-             response.setData(data);
-             return response;
-           }
-      immunePlanModel.setId(id);
-      if (immuneEartagFile != null) {
-
-        String filePath = pathPre + immunePlanModel.getFactoryNum().toString() + "/immuneEartag/";
-
-        String fileName = immuneEartagFile.getOriginalFilename();
-        try {
-          fileName = UploadUtil.uploadFile(immuneEartagFile.getBytes(),filePath,fileName);
-        } catch (Exception e) {
-          return Responses.errorResponse("update file error");
+        if (bindingResult.hasErrors()) {
+            Response response = Responses.successResponse();
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("error", bindingResult.getAllErrors());
+            response.setData(data);
+            return response;
         }
-
-        String oldPath = filePath + immunePlanModel.getImmuneEartag();
-        immunePlanModel.setImmuneEartag(fileName);
-        int row = this.immunePlanService.updateImmunePlanModelByOperator(immunePlanModel);
-        if (row == 1) {
-          File file = new File(oldPath);
-          file.delete();
+        immunePlanModel.setId(id);
+        ImmunePlanModel judgeTemp = immunePlanService.getImmunePlanModelById(id);
+        if ("1".equals(judgeTemp.getIspassCheck()) || "1".equals(judgeTemp.getIspassSup())) {
+            return Responses.errorResponse("已审核/监督,不可修改");
         } else {
-          String newPath = filePath + fileName;
-          File file = new File(newPath);
-          file.delete();
-        }
-        return JudgeUtil.JudgeUpdate(row);
-      } else {
-        int row = this.immunePlanService.updateImmunePlanModelByOperator(immunePlanModel);
-        return JudgeUtil.JudgeUpdate(row);
-      }
+            if (immuneEartagFile != null) {
 
+                String filePath = pathPre + immunePlanModel.getFactoryNum().toString() + "/immuneEartag/";
+
+                String fileName = immuneEartagFile.getOriginalFilename();
+                try {
+                    fileName = UploadUtil.uploadFile(immuneEartagFile.getBytes(), filePath, fileName);
+                } catch (Exception e) {
+                    return Responses.errorResponse("update file error");
+                }
+
+                String oldPath = filePath + immunePlanModel.getImmuneEartag();
+                immunePlanModel.setImmuneEartag(fileName);
+                immunePlanModel.setIspassCheck("2");
+                immunePlanModel.setIspassSup("2");
+                int row = this.immunePlanService.updateImmunePlanModelByOperator(immunePlanModel);
+                if (row == 1) {
+                    File file = new File(oldPath);
+                    file.delete();
+                } else {
+                    String newPath = filePath + fileName;
+                    File file = new File(newPath);
+                    file.delete();
+                }
+                return JudgeUtil.JudgeUpdate(row);
+            } else {
+                int row = this.immunePlanService.updateImmunePlanModelByOperator(immunePlanModel);
+                return JudgeUtil.JudgeUpdate(row);
+            }
+        }
     }
 
     /**

@@ -444,35 +444,39 @@ public class RepellentPlanResource {
             return Responses.errorResponse("Operate wrong");
 
         } else {
-
-          if (repellentEartag != null) {
-            String filePath = pathPre + repellentPlanModel.getFactoryNum().toString() + "/repellentEartag/";
-
-            String fileName = repellentEartag.getOriginalFilename();
-            try {
-              fileName = UploadUtil.uploadFile(repellentEartag.getBytes(),filePath,fileName);
-            } catch (Exception e) {
-
-              return Responses.errorResponse("update file error");
-
-            }
-
-            String oldPath = filePath + repellentPlanModel.getRepellentEartag();
-            repellentPlanModel.setRepellentEartag(fileName);
-            int row = this.repellentPlanService.updateRepellentPlanModelByOperator(repellentPlanModel);
-            if (row == 1) {
-              File file = new File(oldPath);
-              file.delete();
+            RepellentPlanModel judgeTemp = repellentPlanService.getRepellentPlanModelById(id);
+            if ("1".equals(judgeTemp.getIspassCheck()) || "1".equals(judgeTemp.getIspassSup())){
+                return Responses.errorResponse("已审核/监督,不可修改");
             } else {
-              String newPath = filePath + fileName;
-              File file = new File(newPath);
-              file.delete();
+                if (repellentEartag != null) {
+                    String filePath = pathPre + repellentPlanModel.getFactoryNum().toString() + "/repellentEartag/";
+
+                    String fileName = repellentEartag.getOriginalFilename();
+                    try {
+                        fileName = UploadUtil.uploadFile(repellentEartag.getBytes(), filePath, fileName);
+                    } catch (Exception e) {
+
+                        return Responses.errorResponse("update file error");
+
+                    }
+
+                    String oldPath = filePath + repellentPlanModel.getRepellentEartag();
+                    repellentPlanModel.setRepellentEartag(fileName);
+                    int row = this.repellentPlanService.updateRepellentPlanModelByOperator(repellentPlanModel);
+                    if (row == 1) {
+                        File file = new File(oldPath);
+                        file.delete();
+                    } else {
+                        String newPath = filePath + fileName;
+                        File file = new File(newPath);
+                        file.delete();
+                    }
+                    return JudgeUtil.JudgeUpdate(row);
+                } else {
+                    int row = this.repellentPlanService.updateRepellentPlanModelByOperator(repellentPlanModel);
+                    return JudgeUtil.JudgeUpdate(row);
+                }
             }
-            return JudgeUtil.JudgeUpdate(row);
-          } else {
-            int row = this.repellentPlanService.updateRepellentPlanModelByOperator(repellentPlanModel);
-            return JudgeUtil.JudgeUpdate(row);
-          }
         }
     }
 
